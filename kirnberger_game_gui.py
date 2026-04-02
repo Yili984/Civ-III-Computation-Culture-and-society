@@ -627,25 +627,90 @@ class DiceGameGUI:
             score.append(melody_part)
             score.append(accomp_part)
 
-            # Try to show in MuseScore or other notation software
+            # Generate sheet music notation as PNG
             text.insert(tk.END, "✓ Score created successfully!\n")
             text.insert(tk.END, "  - 14 bars with melody and accompaniment\n")
             text.insert(tk.END, "  - Properly formatted in 3/8 time\n")
             text.insert(tk.END, "  - C major key signature\n\n")
 
-            # Offer to open in notation software
-            text.insert(tk.END, "Opening score in notation software...\n")
-            text.insert(tk.END, "(If MuseScore is installed, the score will open there)\n\n")
+            text.insert(tk.END, "📄 GENERATING SHEET MUSIC NOTATION...\n")
+            text.insert(tk.END, "-" * 80 + "\n")
             viz_window.update()
 
+            # Try to generate PNG notation
+            score_image_path = None
             try:
-                # This will open MuseScore if installed
-                score.show()
-                text.insert(tk.END, "✓ Score opened in external notation software!\n")
-            except:
-                text.insert(tk.END, "⚠ Could not open external notation software.\n")
-                text.insert(tk.END, "  Install MuseScore from https://musescore.org/ to view notation.\n")
-                text.insert(tk.END, "  Or open the MIDI file in any notation software.\n")
+                # Try to write PNG using lilypond or musicxml
+                score_image_path = "score_notation.png"
+
+                # Attempt PNG generation
+                try:
+                    # Try lilypond first (if installed)
+                    score.write('lily.png', fp=score_image_path)
+                    text.insert(tk.END, "✓ Sheet music generated using Lilypond\n")
+                except:
+                    try:
+                        # Try musicxml with conversion
+                        score.write('musicxml.png', fp=score_image_path)
+                        text.insert(tk.END, "✓ Sheet music generated using MusicXML\n")
+                    except:
+                        # Fallback: try to open in MuseScore which can display notation
+                        text.insert(tk.END, "⚠ PNG generation requires MuseScore or Lilypond\n")
+                        text.insert(tk.END, "  Attempting to open in notation software...\n")
+                        try:
+                            score.show()
+                            text.insert(tk.END, "✓ Score opened in external notation software!\n")
+                        except:
+                            text.insert(tk.END, "⚠ Could not generate or display sheet music.\n")
+                            text.insert(tk.END, "  Install MuseScore from https://musescore.org/\n")
+                            text.insert(tk.END, "  or Lilypond from http://lilypond.org/\n")
+                        score_image_path = None
+
+                # If PNG was successfully created, display it in the window
+                if score_image_path and os.path.exists(score_image_path):
+                    text.insert(tk.END, f"✓ Sheet music saved: {score_image_path}\n\n")
+
+                    # Create a new frame to display the image
+                    try:
+                        from PIL import Image, ImageTk
+
+                        # Create image display section
+                        text.insert(tk.END, "\n" + "=" * 80 + "\n")
+                        text.insert(tk.END, "SHEET MUSIC NOTATION:\n")
+                        text.insert(tk.END, "=" * 80 + "\n")
+                        text.insert(tk.END, "(See image below - scroll down)\n\n")
+
+                        # Create a canvas to display the image
+                        img_canvas = tk.Canvas(viz_window, bg='white')
+                        img_canvas.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+
+                        # Load and display image
+                        img = Image.open(score_image_path)
+
+                        # Resize if too large
+                        max_width = 950
+                        if img.width > max_width:
+                            ratio = max_width / img.width
+                            new_height = int(img.height * ratio)
+                            img = img.resize((max_width, new_height), Image.Resampling.LANCZOS)
+
+                        photo = ImageTk.PhotoImage(img)
+                        img_canvas.create_image(10, 10, anchor=tk.NW, image=photo)
+                        img_canvas.image = photo  # Keep reference
+                        img_canvas.config(scrollregion=img_canvas.bbox(tk.ALL))
+
+                        text.insert(tk.END, "✓ Sheet music displayed below!\n")
+
+                    except ImportError:
+                        text.insert(tk.END, "⚠ PIL/Pillow not installed - cannot display image\n")
+                        text.insert(tk.END, f"  View the image at: {score_image_path}\n")
+                    except Exception as e:
+                        text.insert(tk.END, f"⚠ Could not display image: {e}\n")
+                        text.insert(tk.END, f"  View the image at: {score_image_path}\n")
+
+            except Exception as e:
+                text.insert(tk.END, f"⚠ Sheet music generation failed: {e}\n")
+                text.insert(tk.END, "  You can still open the MIDI file in MuseScore\n")
 
         except Exception as e:
             text.insert(tk.END, f"\n⚠ Notation generation issue: {str(e)}\n")
