@@ -147,21 +147,22 @@ class KirnbergerGame:
         }
 
         # Bar 6 - I (C major) - HALF CADENCE! Strong period ending
+        # All variants end with substantial duration (0.75 or more) for clear phrase closure
         data[6] = {
             'harmony': 'I',
             'chord_notes': ['C4', 'E4', 'G4'],
             'variants': [
-                [('D5', 0.25), ('C5', 0.25), ('C5', 1.0)],      # Quick approach, held resolution
+                [('D5', 0.25), ('C5', 0.25), ('C5', 1.0)],      # Quick approach, WHOLE NOTE resolution
                 [('E5', 0.5), ('D5', 0.25), ('C5', 0.75)],      # Classic descent with emphasis
-                [('G5', 0.75), ('E5', 0.25), ('C5', 0.5)],      # Dramatic arpeggio resolution
-                [('B4', 0.25), ('C5', 1.25)],                   # Leading tone to long tonic (2 notes!)
-                [('F5', 0.25), ('E5', 0.25), ('C5', 1.0)],      # Suspension resolution held
+                [('G5', 0.5), ('C5', 1.0)],                     # Dramatic leap to WHOLE NOTE
+                [('B4', 0.25), ('C5', 1.25)],                   # Leading tone to VERY LONG tonic
+                [('F5', 0.25), ('E5', 0.25), ('C5', 1.0)],      # Suspension to WHOLE NOTE
                 [('D5', 0.5), ('D5', 0.25), ('C5', 0.75)],      # Emphatic repeated approach
-                [('C5', 1.5)],                                   # Single sustained tonic (strong!)
-                [('E5', 0.75), ('C5', 0.75)],                   # Two-note cadence
-                [('G4', 0.25), ('B4', 0.25), ('C5', 1.0)],      # Rising resolution held
-                [('A4', 0.25), ('B4', 0.25), ('C5', 1.0)],      # Stepwise to held tonic
-                [('C5', 0.25), ('D5', 0.25), ('C5', 1.0)]       # Neighbor to resolution
+                [('C5', 1.5)],                                   # Single sustained FULL BAR (strong!)
+                [('E5', 0.75), ('C5', 0.75)],                   # Two-note strong cadence
+                [('G4', 0.25), ('B4', 0.25), ('C5', 1.0)],      # Rising to WHOLE NOTE
+                [('A4', 0.25), ('B4', 0.25), ('C5', 1.0)],      # Stepwise to WHOLE NOTE
+                [('C5', 0.5), ('C5', 1.0)]                      # Repeated tonic to WHOLE NOTE
             ]
         }
 
@@ -300,21 +301,22 @@ class KirnbergerGame:
         }
 
         # Bar 14 - I (C major) - FINAL CADENCE!!! Grand, conclusive resolution!
+        # ALL variants end with WHOLE NOTE or longer for maximum finality
         data[14] = {
             'harmony': 'I',
             'chord_notes': ['C4', 'E4', 'G4'],
             'variants': [
                 [('C5', 1.5)],                                   # Single sustained tonic - ultimate finality!
-                [('E5', 0.25), ('D5', 0.25), ('C5', 1.0)],      # Graceful descent to long tonic
-                [('G5', 0.75), ('E5', 0.25), ('C5', 0.5)],      # Grand arpeggio resolution
-                [('D5', 0.25), ('B4', 0.25), ('C5', 1.0)],      # Leading tone to held tonic
-                [('E5', 0.5), ('E5', 0.25), ('C5', 0.75)],      # Emphatic arrival
-                [('C6', 0.5), ('G5', 0.25), ('C5', 0.75)],      # Octave cascade to resolution
-                [('B4', 0.25), ('C5', 1.25)],                   # Direct leading tone resolution (2 notes!)
-                [('G5', 0.75), ('G5', 0.25), ('C5', 0.5)],      # Double dominant emphasis
-                [('F5', 0.25), ('E5', 0.25), ('C5', 1.0)],      # Suspension resolution held
-                [('D5', 0.5), ('C5', 1.0)],                     # Simple, clear, held
-                [('A4', 0.25), ('G4', 0.25), ('C5', 1.0)]       # Rising to sustained tonic
+                [('E5', 0.25), ('D5', 0.25), ('C5', 1.0)],      # Graceful descent to WHOLE NOTE tonic
+                [('G5', 0.5), ('C5', 1.0)],                     # Grand leap to WHOLE NOTE resolution
+                [('D5', 0.25), ('B4', 0.25), ('C5', 1.0)],      # Leading tone to WHOLE NOTE tonic
+                [('E5', 0.5), ('C5', 1.0)],                     # Emphatic arrival on WHOLE NOTE
+                [('C6', 0.5), ('C5', 1.0)],                     # Octave drop to WHOLE NOTE tonic
+                [('B4', 0.25), ('C5', 1.25)],                   # Direct leading tone to VERY LONG tonic
+                [('G5', 0.5), ('C5', 1.0)],                     # Fifth to WHOLE NOTE tonic
+                [('F5', 0.25), ('E5', 0.25), ('C5', 1.0)],      # Suspension to WHOLE NOTE resolution
+                [('D5', 0.5), ('C5', 1.0)],                     # Simple descent to WHOLE NOTE
+                [('C5', 1.5)]                                    # Another sustained WHOLE BAR for variety
             ]
         }
 
@@ -408,6 +410,8 @@ class KirnbergerGame:
 
             # Add notes from composition
             for bar_data in composition:
+                bar_num = bar_data['bar']
+
                 # Add melody notes with their specific durations
                 for note_data in bar_data['melody']:
                     if isinstance(note_data, tuple):
@@ -418,25 +422,67 @@ class KirnbergerGame:
                     n = note.Note(note_name, quarterLength=duration)
                     melody_part.append(n)
 
-                # Add chord accompaniment (Alberti bass pattern or block chords)
+                # Add chord accompaniment with CADENTIAL PROGRESSIONS
                 chord_notes = bar_data['chord_notes']
+                harmony = bar_data['harmony']
 
-                # Create an Alberti bass-style pattern: low-high-middle-high
-                # Or use block chords for simpler accompaniment
-                # Pattern: bass note (quarter) + chord (eighth)
+                # Enhanced accompaniment for CADENCES
+                # Bar 5 (V before half cadence) - Add dominant 7th
+                # Bar 13 (V before final cadence) - Add dominant 7th for stronger resolution
+                if bar_num == 5 or bar_num == 13:
+                    # Dominant 7th chord: G-B-D-F (in C major)
+                    bass_note = chord_notes[0].replace('4', '3').replace('5', '3')  # G3
+                    bass = note.Note(bass_note, quarterLength=0.75)
+                    accomp_part.append(bass)
 
-                # Bass note (lowest note of chord)
-                bass_note = chord_notes[0].replace('4', '3').replace('5', '3')
-                bass = note.Note(bass_note, quarterLength=0.75)  # Dotted eighth = 3/4 of quarter
-                accomp_part.append(bass)
+                    # V7 chord with 7th: G3-B3-D4-F4
+                    chord_pitches = ['G3', 'B3', 'D4', 'F4']  # Dominant 7th
+                    ch = chord.Chord(chord_pitches, quarterLength=0.75)
+                    accomp_part.append(ch)
 
-                # Chord (remaining beat)
-                # Create a chord with all three notes
-                chord_pitches = [chord_notes[0].replace('4', '3').replace('5', '3'),
-                                chord_notes[1].replace('5', '4'),
-                                chord_notes[2].replace('5', '4')]
-                ch = chord.Chord(chord_pitches, quarterLength=0.75)
-                accomp_part.append(ch)
+                # Bar 6 (I - half cadence resolution) - Strong tonic
+                elif bar_num == 6:
+                    bass_note = 'C3'  # Strong low C
+                    bass = note.Note(bass_note, quarterLength=0.75)
+                    accomp_part.append(bass)
+
+                    # Full tonic chord with doubled root
+                    chord_pitches = ['C3', 'E3', 'G3', 'C4']  # Strong tonic
+                    ch = chord.Chord(chord_pitches, quarterLength=0.75)
+                    accomp_part.append(ch)
+
+                # Bar 12 (I6/4 - cadential 6/4) - Preparation for final cadence
+                elif bar_num == 12:
+                    bass_note = 'G3'  # G in bass (6/4 inversion)
+                    bass = note.Note(bass_note, quarterLength=0.75)
+                    accomp_part.append(bass)
+
+                    # I6/4 chord: G-C-E
+                    chord_pitches = ['G3', 'C4', 'E4']
+                    ch = chord.Chord(chord_pitches, quarterLength=0.75)
+                    accomp_part.append(ch)
+
+                # Bar 14 (I - FINAL CADENCE) - Ultimate resolution with full chord
+                elif bar_num == 14:
+                    # Very strong bass - low C with long duration
+                    bass_note = 'C2'  # Even lower for finality
+                    bass = note.Note(bass_note, quarterLength=1.5)  # Full bar!
+                    accomp_part.append(bass)
+
+                    # NO additional chord - let the bass ring with melody for maximum clarity
+                    # (The single low C with melody creates strongest ending)
+
+                # All other bars - standard accompaniment
+                else:
+                    bass_note = chord_notes[0].replace('4', '3').replace('5', '3')
+                    bass = note.Note(bass_note, quarterLength=0.75)
+                    accomp_part.append(bass)
+
+                    chord_pitches = [chord_notes[0].replace('4', '3').replace('5', '3'),
+                                    chord_notes[1].replace('5', '4'),
+                                    chord_notes[2].replace('5', '4')]
+                    ch = chord.Chord(chord_pitches, quarterLength=0.75)
+                    accomp_part.append(ch)
 
             score.append(melody_part)
             score.append(accomp_part)

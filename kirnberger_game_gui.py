@@ -55,15 +55,37 @@ class DiceGameGUI:
             bg='#f0f0f0',
             fg='#2c3e50'
         )
-        title.pack(pady=20)
+        title.pack(pady=15)
+
+        # Description frame with background
+        desc_frame = tk.Frame(self.root, bg='#ecf0f1', relief=tk.GROOVE, borderwidth=2)
+        desc_frame.pack(pady=10, padx=40, fill=tk.X)
+
+        # About the game
+        about_text = (
+            "About: Kirnberger's Musikalisches Würfelspiel (Musical Dice Game) is an 18th-century\n"
+            "algorithmic composition method. Roll dice to select melodic variants for each measure,\n"
+            "creating one of 379 trillion unique Mozart-style minuets in C major (3/8 time).\n"
+            "Each piece follows classical harmony: Period 1 (bars 1-6) and Period 2 (bars 7-14)."
+        )
+        about_label = tk.Label(
+            desc_frame,
+            text=about_text,
+            font=("Arial", 9),
+            bg='#ecf0f1',
+            fg='#2c3e50',
+            justify=tk.LEFT,
+            wraplength=800
+        )
+        about_label.pack(pady=8, padx=10)
 
         # Instructions
         instructions = tk.Label(
             self.root,
-            text="Roll the dice to compose your unique Mozart-style piece!\nRoll for each of the 14 bars, then visualize and play your composition.",
-            font=("Arial", 11),
+            text="Roll the dice to compose your unique piece!\nRoll for each of the 14 bars, then visualize and play your composition.",
+            font=("Arial", 11, "bold"),
             bg='#f0f0f0',
-            fg='#34495e',
+            fg='#16a085',
             justify=tk.CENTER
         )
         instructions.pack(pady=10)
@@ -397,16 +419,17 @@ class DiceGameGUI:
 
         # Create visualization window
         viz_window = tk.Toplevel(self.root)
-        viz_window.title("Music Score Visualization")
-        viz_window.geometry("800x600")
+        viz_window.title("Music Score Visualization - Kirnberger Dice Game")
+        viz_window.geometry("1000x700")
         viz_window.configure(bg='white')
 
         # Title
         tk.Label(
             viz_window,
-            text="Your Composition",
-            font=("Arial", 18, "bold"),
-            bg='white'
+            text="🎼 Your Unique Composition 🎼",
+            font=("Arial", 20, "bold"),
+            bg='white',
+            fg='#2c3e50'
         ).pack(pady=10)
 
         # Create a frame with scrollbar for the score
@@ -414,7 +437,7 @@ class DiceGameGUI:
         frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
 
         # Text widget to show notation
-        text = tk.Text(frame, width=90, height=30, font=("Courier", 9), bg='#f9f9f9')
+        text = tk.Text(frame, width=100, height=35, font=("Courier", 9), bg='#f9f9f9', wrap=tk.NONE)
         scrollbar = tk.Scrollbar(frame, command=text.yview)
         text.configure(yscrollcommand=scrollbar.set)
 
@@ -422,15 +445,28 @@ class DiceGameGUI:
         text.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
         # Display composition details
-        text.insert(tk.END, "=" * 80 + "\n")
-        text.insert(tk.END, "KIRNBERGER'S MUSICAL DICE GAME - YOUR COMPOSITION\n")
-        text.insert(tk.END, "=" * 80 + "\n\n")
-        text.insert(tk.END, "Legend: ♬=16th ♪=8th ♪.=dotted-8th ♩=quarter ♩.=dotted-quarter 𝅗𝅥.=half\n")
-        text.insert(tk.END, "-" * 80 + "\n\n")
+        text.insert(tk.END, "=" * 90 + "\n")
+        text.insert(tk.END, "       KIRNBERGER'S MUSICAL DICE GAME - YOUR UNIQUE COMPOSITION\n")
+        text.insert(tk.END, "=" * 90 + "\n\n")
 
-        text.insert(tk.END, "PERIOD 1 (bars 1-6):\n")
-        text.insert(tk.END, "-" * 80 + "\n")
-        for item in self.composition[:6]:
+        # Summary information
+        text.insert(tk.END, "COMPOSITION SUMMARY:\n")
+        text.insert(tk.END, f"  • Key: C Major\n")
+        text.insert(tk.END, f"  • Time Signature: 3/8\n")
+        text.insert(tk.END, f"  • Total Bars: 14 (Period 1: 6 bars, Period 2: 8 bars)\n")
+        text.insert(tk.END, f"  • Your Dice Rolls: {self.choices}\n")
+        text.insert(tk.END, f"  • Possible Combinations: {11**14:,}\n\n")
+
+        text.insert(tk.END, "RHYTHM LEGEND: ♬=16th ♪=8th ♪.=dotted-8th ♩=quarter ♩.=dotted-quarter 𝅗𝅥.=dotted-half\n")
+        text.insert(tk.END, "=" * 90 + "\n\n")
+
+        text.insert(tk.END, "╔══════════════════════════════════════════════════════════════════════════════╗\n")
+        text.insert(tk.END, "║  PERIOD 1 (Bars 1-6) - First Phrase                                         ║\n")
+        text.insert(tk.END, "║  Harmonic Progression: I → V → vi → IV → V → I (Half Cadence)               ║\n")
+        text.insert(tk.END, "╚══════════════════════════════════════════════════════════════════════════════╝\n\n")
+
+        for i, item in enumerate(self.composition[:6]):
+            bar_num = item['bar']
             melody_notes = []
             for note_data in item['melody']:
                 if isinstance(note_data, tuple):
@@ -454,12 +490,22 @@ class DiceGameGUI:
                 else:
                     melody_notes.append(f"{note_data:4s}")
             melody_str = '  '.join(melody_notes)
-            text.insert(tk.END, f"Bar {item['bar']:2d} | {item['harmony']:6s} | Variant {item['variant']:2d} | {melody_str}\n")
 
-        text.insert(tk.END, "\n")
-        text.insert(tk.END, "PERIOD 2 (bars 7-14):\n")
-        text.insert(tk.END, "-" * 80 + "\n")
-        for item in self.composition[6:]:
+            # Highlight bar 6 (half cadence)
+            if bar_num == 6:
+                text.insert(tk.END, f">>> Bar {bar_num:2d} | {item['harmony']:6s} | Dice Roll: {self.choices[i]:2d} | Variant {item['variant']:2d} | {melody_str}\n")
+                text.insert(tk.END, "         *** HALF CADENCE - End of Period 1 ***\n\n")
+            else:
+                text.insert(tk.END, f"    Bar {bar_num:2d} | {item['harmony']:6s} | Dice Roll: {self.choices[i]:2d} | Variant {item['variant']:2d} | {melody_str}\n")
+
+        text.insert(tk.END, "\n\n")
+        text.insert(tk.END, "╔══════════════════════════════════════════════════════════════════════════════╗\n")
+        text.insert(tk.END, "║  PERIOD 2 (Bars 7-14) - Second Phrase                                       ║\n")
+        text.insert(tk.END, "║  Harmonic Progression: I → V → vi → iii → IV → I6/4 → V → I (Final Cadence) ║\n")
+        text.insert(tk.END, "╚══════════════════════════════════════════════════════════════════════════════╝\n\n")
+
+        for i, item in enumerate(self.composition[6:], 6):
+            bar_num = item['bar']
             melody_notes = []
             for note_data in item['melody']:
                 if isinstance(note_data, tuple):
@@ -482,12 +528,26 @@ class DiceGameGUI:
                 else:
                     melody_notes.append(f"{note_data:4s}")
             melody_str = '  '.join(melody_notes)
-            text.insert(tk.END, f"Bar {item['bar']:2d} | {item['harmony']:6s} | Variant {item['variant']:2d} | {melody_str}\n")
 
-        text.insert(tk.END, "\n" + "=" * 80 + "\n")
-        text.insert(tk.END, f"Your dice rolls: {self.choices}\n")
-        text.insert(tk.END, f"MIDI file: {self.midi_filename}\n")
-        text.insert(tk.END, "=" * 80 + "\n")
+            # Highlight cadential approach (bars 12-14)
+            if bar_num == 12:
+                text.insert(tk.END, f"    Bar {bar_num:2d} | {item['harmony']:6s} | Dice Roll: {self.choices[i]:2d} | Variant {item['variant']:2d} | {melody_str}\n")
+                text.insert(tk.END, "         (Cadential 6/4 - preparation for final cadence)\n")
+            elif bar_num == 13:
+                text.insert(tk.END, f"    Bar {bar_num:2d} | {item['harmony']:6s} | Dice Roll: {self.choices[i]:2d} | Variant {item['variant']:2d} | {melody_str}\n")
+                text.insert(tk.END, "         (Dominant 7th - building tension for resolution)\n")
+            elif bar_num == 14:
+                text.insert(tk.END, f">>> Bar {bar_num:2d} | {item['harmony']:6s} | Dice Roll: {self.choices[i]:2d} | Variant {item['variant']:2d} | {melody_str}\n")
+                text.insert(tk.END, "         *** FINAL CADENCE - Grand Resolution! ***\n")
+            else:
+                text.insert(tk.END, f"    Bar {bar_num:2d} | {item['harmony']:6s} | Dice Roll: {self.choices[i]:2d} | Variant {item['variant']:2d} | {melody_str}\n")
+
+        text.insert(tk.END, "\n" + "=" * 90 + "\n")
+        text.insert(tk.END, f"COMPOSITION COMPLETE!\n")
+        text.insert(tk.END, f"  • MIDI File Saved: {self.midi_filename}\n")
+        text.insert(tk.END, f"  • Features: Enhanced cadences with V7 chords and sustained bass notes\n")
+        text.insert(tk.END, f"  • Final Bar: Uses whole notes for ultimate finality\n")
+        text.insert(tk.END, "=" * 90 + "\n")
 
         # Try to generate music21 visualization
         try:
