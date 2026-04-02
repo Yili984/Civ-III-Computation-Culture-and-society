@@ -33,8 +33,17 @@ class DiceGameGUI:
     def __init__(self, root):
         self.root = root
         self.root.title("Kirnberger's Musical Dice Game")
-        self.root.geometry("900x700")
+        self.root.geometry("900x750")
         self.root.configure(bg='#f0f0f0')
+
+        # Maximize window for best display
+        try:
+            self.root.state('zoomed')  # Windows
+        except:
+            try:
+                self.root.attributes('-zoomed', True)  # Linux
+            except:
+                pass  # MacOS uses different approach
 
         # Game state
         self.game = KirnbergerGame()
@@ -271,6 +280,20 @@ class DiceGameGUI:
             cursor='hand2'
         )
         self.reset_button.pack(side=tk.LEFT, padx=10)
+
+        # Display reminder
+        reminder_frame = tk.Frame(self.root, bg='#fff3cd', relief=tk.FLAT, borderwidth=1)
+        reminder_frame.pack(pady=10, padx=40, fill=tk.X)
+
+        reminder_label = tk.Label(
+            reminder_frame,
+            text="💡 Tip: Maximize this window or use full screen to ensure all interface features are properly displayed.",
+            font=("Arial", 9, "italic"),
+            bg='#fff3cd',
+            fg='#856404',
+            justify=tk.CENTER
+        )
+        reminder_label.pack(pady=5)
 
     def roll_dice(self):
         """Animate dice roll and record choice"""
